@@ -1,0 +1,120 @@
+# ==============================================================================
+# Skilli DevOps Lab — Kubernetes Deployment & Services for Cal-App
+# Student: anis2401098 | MCA (2025-2027)
+# Namespace: student-anis2401098
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. NEXT.JS APPLICATION DEPLOYMENT
+# ------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cal-app-deployment
+  namespace: student-anis2401098
+  labels:
+    app: cal-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cal-app
+  template:
+    metadata:
+      labels:
+        app: cal-app
+    spec:
+      imagePullSecrets:
+        - name: nexus-docker-secret
+      containers:
+        - name: cal-app
+          image: nexus.imcc.skilli.in/student-docker/anis2401098/cal-app:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: HOSTNAME
+              value: "0.0.0.0"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /api/history
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/history
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+# ------------------------------------------------------------------------------
+# 2. CAL-APP CLUSTERIP SERVICE (PRIMARY)
+# ------------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: cal-app-service
+  namespace: student-anis2401098
+  labels:
+    app: cal-app
+spec:
+  type: ClusterIP
+  selector:
+    app: cal-app
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+---
+# ------------------------------------------------------------------------------
+# 3. BACKEND-SERVICE (COMPATIBILITY ALIAS FOR LAB CHECKS)
+# ------------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: student-anis2401098
+  labels:
+    app: cal-app
+    tier: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: cal-app
+  ports:
+    - name: http
+      port: 5000
+      targetPort: 3000
+---
+# ------------------------------------------------------------------------------
+# 4. FRONTEND-SERVICE (COMPATIBILITY ALIAS FOR LAB CHECKS)
+# ------------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: student-anis2401098
+  labels:
+    app: cal-app
+    tier: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: cal-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
