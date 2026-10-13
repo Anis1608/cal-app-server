@@ -185,7 +185,7 @@ export default function Home() {
         <div className="brand-wrapper">
           <div className="brand-icon">∑</div>
           <div className="brand-text">
-            <h1>Krishna Pro</h1>
+            <h1>Anis Pro</h1>
             <div className="brand-subtitle">
               <span>Scientific Engine</span>
               <button
