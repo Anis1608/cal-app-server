@@ -158,6 +158,7 @@ EOF
                         kubectl apply -f k8s/ -n ${K8S_NAMESPACE} --validate=false --insecure-skip-tls-verify=true
 
                         kubectl set image deployment/cal-app-deployment cal-app=${APP_IMAGE} -n ${K8S_NAMESPACE} --insecure-skip-tls-verify=true
+                        kubectl rollout restart deployment/cal-app-deployment -n ${K8S_NAMESPACE} --insecure-skip-tls-verify=true || true
                     '''
                 }
             }
@@ -174,9 +175,14 @@ EOF
                         [ -f ./kubeconfig ] || { cp "${KUBECONFIG_FILE}" ./kubeconfig && chmod 600 ./kubeconfig; }
                         export KUBECONFIG=$(pwd)/kubeconfig
 
+                        echo "Waiting for rollout..."
                         kubectl rollout status deployment/cal-app-deployment -n ${K8S_NAMESPACE} --timeout=120s --insecure-skip-tls-verify=true || true
-                        echo "Status of resources in namespace ${K8S_NAMESPACE}:"
-                        kubectl get pods,svc,ingress -n ${K8S_NAMESPACE} --insecure-skip-tls-verify=true
+
+                        echo "Pods in namespace ${K8S_NAMESPACE}:"
+                        kubectl get pods -n ${K8S_NAMESPACE} -o wide --insecure-skip-tls-verify=true
+
+                        echo "Recent events:"
+                        kubectl get events -n ${K8S_NAMESPACE} --sort-by='.metadata.creationTimestamp' --insecure-skip-tls-verify=true | tail -n 10 || true
                     '''
                 }
             }
