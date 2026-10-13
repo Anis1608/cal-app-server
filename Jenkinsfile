@@ -25,7 +25,7 @@ pipeline {
 
         // Nexus Credentials
         NEXUS_USER          = 'anis2401098'
-        NEXUS_PASS          = 'nha&9XYjbn*P'
+        NEXUS_PASS          = '77SJ!du%Ejf*'
 
         // Unique Jenkins Credential IDs
         SONAR_CRED_ID       = 'anis2401098-sonar-token'
