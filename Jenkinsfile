@@ -31,16 +31,8 @@ pipeline {
         SONAR_CRED_ID       = 'anis2401098-sonar-token'
         KUBE_CRED_ID        = 'anis2401098-kubeconfig'
 
-        // Image tags & paths
         IMAGE_TAG           = "${env.BUILD_NUMBER}-${env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'latest'}"
         APP_IMAGE           = "${env.NEXUS_REGISTRY}/${env.NEXUS_REPO_PATH}/cal-app:${env.IMAGE_TAG}"
-        APP_IMAGE_LATEST    = "${env.NEXUS_REGISTRY}/${env.NEXUS_REPO_PATH}/cal-app:latest"
-
-        // Compatibility tags (for standard lab evaluation scripts)
-        BACKEND_IMAGE       = "${env.NEXUS_REGISTRY}/${env.NEXUS_REPO_PATH}/backend:${env.IMAGE_TAG}"
-        BACKEND_LATEST      = "${env.NEXUS_REGISTRY}/${env.NEXUS_REPO_PATH}/backend:latest"
-        FRONTEND_IMAGE      = "${env.NEXUS_REGISTRY}/${env.NEXUS_REPO_PATH}/frontend:${env.IMAGE_TAG}"
-        FRONTEND_LATEST     = "${env.NEXUS_REGISTRY}/${env.NEXUS_REPO_PATH}/frontend:latest"
     }
 
     stages {
@@ -130,27 +122,7 @@ EOF
                             --local dockerfile=. \
                             --output "type=image,name=${APP_IMAGE},push=true"
 
-                        echo "Tagging & pushing latest image (${APP_IMAGE_LATEST})..."
-                        buildctl --addr ${BUILDKIT_SOCK} build \
-                            --frontend dockerfile.v0 \
-                            --local context=. \
-                            --local dockerfile=. \
-                            --output "type=image,name=${APP_IMAGE_LATEST},push=true"
-
-                        echo "Pushing compatibility tags (backend & frontend)..."
-                        buildctl --addr ${BUILDKIT_SOCK} build \
-                            --frontend dockerfile.v0 \
-                            --local context=. \
-                            --local dockerfile=. \
-                            --output "type=image,name=${BACKEND_IMAGE},push=true" || true
-
-                        buildctl --addr ${BUILDKIT_SOCK} build \
-                            --frontend dockerfile.v0 \
-                            --local context=. \
-                            --local dockerfile=. \
-                            --output "type=image,name=${FRONTEND_IMAGE},push=true" || true
-
-                        echo "✅ Docker images built & pushed to Nexus Registry via BuildKit!"
+                        echo "✅ Docker image (${APP_IMAGE}) built & pushed to Nexus Registry via BuildKit!"
                     '''
                 }
             }
