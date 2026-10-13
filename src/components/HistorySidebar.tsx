@@ -178,7 +178,7 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
         {isLoading && history.length === 0 ? (
           <div className="empty-state">
             <span className="empty-state-icon">⏳</span>
-            <p>Loading database records...</p>
+            <p>Loading records..</p>
           </div>
         ) : filteredHistory.length === 0 ? (
           <div className="empty-state">
