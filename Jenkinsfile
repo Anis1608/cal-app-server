@@ -123,12 +123,32 @@ EOF
 
                         BUILDKIT_SOCK=unix:///run/user/1000/buildkit/buildkitd.sock
 
-                        echo "Building & pushing Next.js image to Nexus..."
+                        echo "Building & pushing Next.js Cal-App image (${APP_IMAGE})..."
                         buildctl --addr ${BUILDKIT_SOCK} build \
                             --frontend dockerfile.v0 \
                             --local context=. \
                             --local dockerfile=. \
-                            --output "type=image,\"name=${APP_IMAGE},${APP_IMAGE_LATEST},${BACKEND_IMAGE},${BACKEND_LATEST},${FRONTEND_IMAGE},${FRONTEND_LATEST}\",push=true"
+                            --output "type=image,name=${APP_IMAGE},push=true"
+
+                        echo "Tagging & pushing latest image (${APP_IMAGE_LATEST})..."
+                        buildctl --addr ${BUILDKIT_SOCK} build \
+                            --frontend dockerfile.v0 \
+                            --local context=. \
+                            --local dockerfile=. \
+                            --output "type=image,name=${APP_IMAGE_LATEST},push=true"
+
+                        echo "Pushing compatibility tags (backend & frontend)..."
+                        buildctl --addr ${BUILDKIT_SOCK} build \
+                            --frontend dockerfile.v0 \
+                            --local context=. \
+                            --local dockerfile=. \
+                            --output "type=image,name=${BACKEND_IMAGE},push=true" || true
+
+                        buildctl --addr ${BUILDKIT_SOCK} build \
+                            --frontend dockerfile.v0 \
+                            --local context=. \
+                            --local dockerfile=. \
+                            --output "type=image,name=${FRONTEND_IMAGE},push=true" || true
 
                         echo "✅ Docker images built & pushed to Nexus Registry via BuildKit!"
                     '''
